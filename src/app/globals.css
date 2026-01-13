@@ -1,0 +1,158 @@
+@import "tailwindcss";
+
+/**
+ * FONT FACES
+ *
+ * Replace these with your project's custom fonts.
+ * Add font files to /public/fonts/
+ */
+
+/* Example: Display font for headings
+@font-face {
+  font-family: 'DisplayFont';
+  src: url('/fonts/display-bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+*/
+
+/* Example: Body font for text
+@font-face {
+  font-family: 'BodyFont';
+  src: url('/fonts/body-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+*/
+
+/**
+ * CSS VARIABLES
+ *
+ * Override these in config/project.ts or directly here.
+ * Colors are injected via the layout.tsx <style> tag.
+ */
+
+:root {
+  /* Colors - These are default values, override in project.ts */
+  --color-primary: #C75B39;
+  --color-secondary: #D4A853;
+  --color-dark: #1A1714;
+  --color-light: #FAF7F2;
+  --color-muted: #6B6B6B;
+
+  /* RGB versions for rgba() usage */
+  --color-primary-rgb: 199, 91, 57;
+  --color-secondary-rgb: 212, 168, 83;
+  --color-dark-rgb: 26, 23, 20;
+  --color-light-rgb: 250, 247, 242;
+  --color-muted-rgb: 107, 107, 107;
+
+  /* Fonts - Update to match your @font-face declarations */
+  --font-display: Georgia, serif;
+  --font-body: system-ui, -apple-system, sans-serif;
+}
+
+/**
+ * BASE STYLES
+ */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/**
+ * TYPOGRAPHY
+ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+/**
+ * ANIMATIONS
+ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.6s ease-out forwards;
+}
+
+.animate-slideDown {
+  animation: slideDown 0.6s ease-out forwards;
+}
+
+/**
+ * TAILWIND THEME INTEGRATION
+ */
+
+@theme inline {
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+  --color-dark: var(--color-dark);
+  --color-light: var(--color-light);
+  --color-muted: var(--color-muted);
+}
+
+/**
+ * SCROLLBAR STYLING (optional)
+ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-dark);
+}
