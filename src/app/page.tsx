@@ -4,6 +4,7 @@ import { PasswordGate } from '@/components/PasswordGate';
 import { Hero } from '@/components/Hero';
 import { SectionPanel } from '@/components/SectionPanel';
 import { ChatPanel } from '@/components/ChatPanel';
+import { PriceChart } from '@/components/PriceChart';
 import { getEnabledSections } from '@/data/sections';
 import { features } from '@/config/features';
 
@@ -14,6 +15,9 @@ function Landing() {
     <main className="min-h-screen">
       {/* Hero Section */}
       <Hero />
+
+      {/* Live Price Chart */}
+      <PriceChart />
 
       {/* Section Panels */}
       <div>
