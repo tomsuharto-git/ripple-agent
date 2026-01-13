@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { project } from '@/config/project';
 import { features } from '@/config/features';
 import { chatConfig } from '@/data/chat-context';
@@ -176,7 +177,13 @@ export function ChatPanel() {
                       border: message.role === 'assistant' ? '1px solid var(--color-muted)' : 'none',
                     }}
                   >
-                    <p className="whitespace-pre-wrap text-sm">{message.content}</p>
+                    {message.role === 'assistant' ? (
+                      <div className="prose prose-sm max-w-none prose-headings:mt-2 prose-headings:mb-1 prose-p:my-1 prose-ul:my-1 prose-li:my-0">
+                        <ReactMarkdown>{message.content}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <p className="whitespace-pre-wrap text-sm">{message.content}</p>
+                    )}
                   </div>
                   {message.role === 'user' && (
                     <div
@@ -215,7 +222,9 @@ export function ChatPanel() {
                       borderColor: 'var(--color-muted)',
                     }}
                   >
-                    <p className="whitespace-pre-wrap text-sm">{streamingContent}</p>
+                    <div className="prose prose-sm max-w-none prose-headings:mt-2 prose-headings:mb-1 prose-p:my-1 prose-ul:my-1 prose-li:my-0">
+                      <ReactMarkdown>{streamingContent}</ReactMarkdown>
+                    </div>
                   </div>
                 </div>
               )}
