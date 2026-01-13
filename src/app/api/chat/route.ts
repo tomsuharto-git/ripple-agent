@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { systemPrompt, chatConfig } from '@/data/chat-context';
 import { getXRPPrice, formatPriceContext, isPriceQuery } from '@/lib/crypto-price';
+import { searchWeb, formatSearchContext, shouldSearchWeb, buildSearchQuery } from '@/lib/web-search';
 
 const anthropic = new Anthropic();
 
@@ -14,14 +15,28 @@ export async function POST(req: Request) {
       content: msg.content,
     }));
 
-    // Check if latest message is asking about price/market data
+    // Check if latest message needs additional context
     const latestMessage = messages[messages.length - 1];
     let enhancedSystemPrompt = systemPrompt;
 
-    if (latestMessage && isPriceQuery(latestMessage.content)) {
-      const priceData = await getXRPPrice();
-      if (priceData) {
-        enhancedSystemPrompt = systemPrompt + '\n\n---\n' + formatPriceContext(priceData);
+    if (latestMessage) {
+      const userQuery = latestMessage.content;
+
+      // Fetch price data if asking about price
+      if (isPriceQuery(userQuery)) {
+        const priceData = await getXRPPrice();
+        if (priceData) {
+          enhancedSystemPrompt += '\n\n---\n' + formatPriceContext(priceData);
+        }
+      }
+
+      // Fetch web search results if asking about news/current events
+      if (shouldSearchWeb(userQuery)) {
+        const searchQuery = buildSearchQuery(userQuery);
+        const searchResults = await searchWeb(searchQuery, 5);
+        if (searchResults && searchResults.results.length > 0) {
+          enhancedSystemPrompt += '\n\n---\n' + formatSearchContext(searchResults);
+        }
       }
     }
 

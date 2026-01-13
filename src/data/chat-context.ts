@@ -219,14 +219,14 @@ export const chatConfig = {
   maxTokens: 4096,
 
   // UI settings
-  placeholder: 'Ask about Ripple strategy, XRP price, competitive analysis, or growth diagnosis...',
+  placeholder: 'Ask about Ripple news, XRP price, strategy, or growth diagnosis...',
   welcomeMessage: `I'm your strategic advisor for the Ripple analysis. I have access to:
 
+- **Web Search**: Latest news and current events (Brave Search)
 - **Live XRP Price**: Real-time market data from CoinGecko
 - **Growth Diagnosis**: Full 9-component GDT analysis (41.2/100 score)
 - **6Cs Research**: Company, Consumer, Communications, Category, Competition, Culture
 - **Strategic Brief**: Reinvent → Connect → Create framework
-- **Competitive Intel**: SWIFT, stablecoins, blockchain peers
 
 What would you like to explore?`,
 
