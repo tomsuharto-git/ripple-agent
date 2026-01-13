@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { systemPrompt, chatConfig } from '@/data/chat-context';
+import { getXRPPrice, formatPriceContext, isPriceQuery } from '@/lib/crypto-price';
 
 const anthropic = new Anthropic();
 
@@ -13,11 +14,22 @@ export async function POST(req: Request) {
       content: msg.content,
     }));
 
+    // Check if latest message is asking about price/market data
+    const latestMessage = messages[messages.length - 1];
+    let enhancedSystemPrompt = systemPrompt;
+
+    if (latestMessage && isPriceQuery(latestMessage.content)) {
+      const priceData = await getXRPPrice();
+      if (priceData) {
+        enhancedSystemPrompt = systemPrompt + '\n\n---\n' + formatPriceContext(priceData);
+      }
+    }
+
     // Create streaming response
     const stream = await anthropic.messages.stream({
       model: chatConfig.model,
       max_tokens: chatConfig.maxTokens,
-      system: systemPrompt,
+      system: enhancedSystemPrompt,
       messages: anthropicMessages,
     });
 
