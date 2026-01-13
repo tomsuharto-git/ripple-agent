@@ -53,14 +53,34 @@ export function ChatPanel() {
         const reader = response.body?.getReader();
         const decoder = new TextDecoder();
         let fullContent = '';
+        let buffer = '';
 
         if (reader) {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-            const chunk = decoder.decode(value, { stream: true });
-            fullContent += chunk;
-            setStreamingContent(fullContent);
+
+            buffer += decoder.decode(value, { stream: true });
+
+            // Parse SSE format: "data: {...}\n\n"
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6); // Remove "data: " prefix
+                if (data === '[DONE]') continue;
+                try {
+                  const parsed = JSON.parse(data);
+                  if (parsed.text) {
+                    fullContent += parsed.text;
+                    setStreamingContent(fullContent);
+                  }
+                } catch {
+                  // Ignore parse errors for incomplete JSON
+                }
+              }
+            }
           }
         }
         setMessages((prev) => [...prev, { role: 'assistant', content: fullContent }]);
