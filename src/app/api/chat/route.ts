@@ -7,7 +7,7 @@ const anthropic = new Anthropic();
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    const { messages, temperature = 0.7 } = await req.json();
 
     // Convert messages to Anthropic format
     const anthropicMessages = messages.map((msg: { role: string; content: string }) => ({
@@ -44,6 +44,7 @@ export async function POST(req: Request) {
     const stream = await anthropic.messages.stream({
       model: chatConfig.model,
       max_tokens: chatConfig.maxTokens,
+      temperature: Math.min(Math.max(temperature, 0), 1), // Clamp between 0 and 1 for Anthropic
       system: enhancedSystemPrompt,
       messages: anthropicMessages,
     });

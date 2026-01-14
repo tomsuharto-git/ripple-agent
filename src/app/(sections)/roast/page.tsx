@@ -1,125 +1,43 @@
-import { SectionHeader } from '@/components/SectionHeader';
-import { AlternatingPanels } from '@/components/layouts/AlternatingPanels';
-import { getSectionById } from '@/data/sections';
+'use client';
 
-// Ripple Brief Roast - Critical analysis of strategic weaknesses
-const roastPanels = [
-  {
-    id: 'identity-crisis',
-    title: 'The Identity Crisis',
-    subtitle: 'Who are you really for?',
-    content: (
-      <div className="space-y-4">
-        <p>
-          Ripple claims to be the "banker's crypto" but banks don't trust it, and crypto natives
-          reject it. You've built enterprise-grade infrastructure but delivered retail-grade confusion.
-        </p>
-        <p className="font-medium" style={{ color: 'var(--color-primary)' }}>
-          Pick an audience. The hybrid approach is destroying both experiences.
-        </p>
-      </div>
-    ),
-  },
-  {
-    id: 'pricing-problem',
-    title: 'The Pre-Mine Problem',
-    subtitle: 'You killed your own scarcity',
-    content: (
-      <div className="space-y-4">
-        <p>
-          100 billion pre-mined tokens eliminated any scarcity narrative before you started.
-          Quarterly token sales create constant selling pressure. Your banking partners actively
-          resist price appreciation because they want predictable costs.
-        </p>
-        <p className="font-medium" style={{ color: 'var(--color-primary)' }}>
-          You built a utility token but marketed it like a speculative asset. Neither works.
-        </p>
-      </div>
-    ),
-  },
-  {
-    id: 'purchase-disaster',
-    title: 'The Purchase Catastrophe',
-    subtitle: '67% abandon trying to buy you',
-    content: (
-      <div className="space-y-4">
-        <p>
-          Your purchase experience scores a devastating 2.1/10. Two-thirds of interested users
-          give up trying to buy XRP due to exchange confusion and regulatory warnings.
-          You've made it nearly impossible for retail investors to become holders.
-        </p>
-        <p className="font-medium" style={{ color: 'var(--color-primary)' }}>
-          This isn't just poor UX—it's active customer prevention.
-        </p>
-      </div>
-    ),
-  },
-  {
-    id: 'emotional-vacuum',
-    title: 'The Emotional Vacuum',
-    subtitle: 'No ideology, no tribe, no love',
-    content: (
-      <div className="space-y-4">
-        <p>
-          Bitcoin has libertarian mystique. Ethereum has builder culture. XRP has... regulatory hope?
-          Your holders maintain instrumental relationships—they hold for what you might become,
-          not what you represent.
-        </p>
-        <p className="font-medium" style={{ color: 'var(--color-primary)' }}>
-          You're a technology in search of a tribe.
-        </p>
-      </div>
-    ),
-  },
-  {
-    id: 'cultural-pariah',
-    title: 'The Cultural Pariah',
-    subtitle: 'Too corporate for crypto, too controversial for banks',
-    content: (
-      <div className="space-y-4">
-        <p>
-          Crypto purists dismiss you as too centralized. Traditional finance views you as too risky.
-          You've positioned yourself in contested territory where neither audience wants you.
-          Authenticity score: 4.2/10—the lowest of any competitor.
-        </p>
-        <p className="font-medium" style={{ color: 'var(--color-primary)' }}>
-          "Necessary but unloved" is not a brand position.
-        </p>
-      </div>
-    ),
-  },
-  {
-    id: 'wasted-resolution',
-    title: 'The Wasted Resolution',
-    subtitle: 'You won the SEC battle, now what?',
-    content: (
-      <div className="space-y-4">
-        <p>
-          The SEC lawsuit created regulatory clarity that competitors don't have—but you never
-          capitalized on it. While you were fighting, Ethereum went proof-of-stake and Solana
-          captured DeFi momentum. You have a 3-6 month window before these advantages become
-          irreversible.
-        </p>
-        <p className="font-medium" style={{ color: 'var(--color-primary)' }}>
-          Stop explaining the past. Start building the future.
-        </p>
-      </div>
-    ),
-  },
-];
+import { useState } from 'react';
 
 export default function RoastPage() {
-  const section = getSectionById('roast');
+  const [isLoading, setIsLoading] = useState(true);
 
   return (
-    <>
-      <SectionHeader
-        title={section?.title || 'Brief Roast'}
-        subtitle={section?.subtitle}
-        icon={section?.icon}
-        variant="dark"
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#0a0a0a' }}>
+      {/* Loading indicator */}
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center z-10" style={{ backgroundColor: '#0a0a0a' }}>
+          <div className="text-center">
+            <div
+              className="w-12 h-12 mx-auto mb-4 rounded-xl flex items-center justify-center animate-pulse"
+              style={{
+                background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+              }}
+            >
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
+              </svg>
+            </div>
+            <p className="text-sm" style={{ color: 'var(--color-muted)' }}>
+              Loading Brief Roast...
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Embedded Roaster Site */}
+      <iframe
+        src="https://roaster-hub.vercel.app/roast/xrp?embed=true"
+        className="flex-1 w-full border-0"
+        style={{ minHeight: '100vh' }}
+        onLoad={() => setIsLoading(false)}
+        title="XRP Brief Roast"
+        allow="fullscreen"
       />
-      <AlternatingPanels panels={roastPanels} />
-    </>
+    </div>
   );
 }

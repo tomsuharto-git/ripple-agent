@@ -17,12 +17,14 @@ export const features = {
   // Toggleable Sections (set false to hide from nav and home)
   sections: {
     research: true,             // Get Smart / 6Cs research
+    deepdive: true,             // Deep Dive research library
+    insights: true,             // Creative Insights (10 provocations)
     analysis: false,            // RFP/Brief analysis
     diagnosis: true,            // Growth Diagnosis
     audience: false,            // Growth Audience / Target profiles
     inspiration: false,         // Creative inspiration
     brief: true,                // Brief Summary
-    roast: true,                // Brief Roast
+    roast: false,               // Brief Roast (content moved to RFP page)
     timeline: false,            // Project timeline
     settings: false,            // Settings page (usually disabled)
   },

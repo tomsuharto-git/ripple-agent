@@ -2,55 +2,34 @@
 @plugin "@tailwindcss/typography";
 
 /**
- * FONT FACES
- *
- * Replace these with your project's custom fonts.
- * Add font files to /public/fonts/
+ * RIPPLE DESIGN SYSTEM
+ * Modern fintech aesthetic with glass effects and blue glow accents
  */
-
-/* Example: Display font for headings
-@font-face {
-  font-family: 'DisplayFont';
-  src: url('/fonts/display-bold.woff2') format('woff2');
-  font-weight: 700;
-  font-display: swap;
-}
-*/
-
-/* Example: Body font for text
-@font-face {
-  font-family: 'BodyFont';
-  src: url('/fonts/body-regular.woff2') format('woff2');
-  font-weight: 400;
-  font-display: swap;
-}
-*/
 
 /**
  * CSS VARIABLES
- *
- * Override these in config/project.ts or directly here.
- * Colors are injected via the layout.tsx <style> tag.
  */
 
 :root {
-  /* Colors - These are default values, override in project.ts */
-  --color-primary: #C75B39;
-  --color-secondary: #D4A853;
-  --color-dark: #1A1714;
-  --color-light: #FAF7F2;
-  --color-muted: #6B6B6B;
+  /* Colors - Ripple palette */
+  --color-primary: #0096E4;
+  --color-secondary: #00D4FF;
+  --color-dark: #0A1628;
+  --color-dark-lighter: #0D1F35;
+  --color-light: #F0F8FF;
+  --color-muted: #5A7A9A;
 
   /* RGB versions for rgba() usage */
-  --color-primary-rgb: 199, 91, 57;
-  --color-secondary-rgb: 212, 168, 83;
-  --color-dark-rgb: 26, 23, 20;
-  --color-light-rgb: 250, 247, 242;
-  --color-muted-rgb: 107, 107, 107;
+  --color-primary-rgb: 0, 150, 228;
+  --color-secondary-rgb: 0, 212, 255;
+  --color-dark-rgb: 10, 22, 40;
+  --color-light-rgb: 240, 248, 255;
+  --color-muted-rgb: 90, 122, 154;
 
-  /* Fonts - Update to match your @font-face declarations */
-  --font-display: Georgia, serif;
-  --font-body: system-ui, -apple-system, sans-serif;
+  /* Fonts - Modern technical aesthetic */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
 /**
@@ -63,10 +42,11 @@ html {
 
 body {
   font-family: var(--font-body);
-  background-color: var(--color-light);
-  color: var(--color-dark);
+  background: linear-gradient(180deg, var(--color-dark) 0%, var(--color-dark-lighter) 100%);
+  color: var(--color-light);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
 }
 
 /**
@@ -75,6 +55,83 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Gradient text effect */
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/**
+ * GLASS EFFECTS
+ */
+
+.glass {
+  background: rgba(13, 31, 53, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 150, 228, 0.15);
+}
+
+.glass-light {
+  background: rgba(240, 248, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-nav {
+  background: rgba(10, 22, 40, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 150, 228, 0.1);
+}
+
+/**
+ * GLOW EFFECTS
+ */
+
+.glow {
+  box-shadow: 0 0 40px rgba(0, 150, 228, 0.15);
+}
+
+.glow-sm {
+  box-shadow: 0 0 20px rgba(0, 150, 228, 0.1);
+}
+
+.glow-lg {
+  box-shadow: 0 0 60px rgba(0, 150, 228, 0.2);
+}
+
+.glow-focus {
+  box-shadow: 0 0 0 2px rgba(0, 150, 228, 0.3), 0 0 30px rgba(0, 150, 228, 0.15);
+}
+
+/* Text glow */
+.text-glow {
+  text-shadow: 0 0 20px rgba(0, 150, 228, 0.5);
+}
+
+/**
+ * GRADIENT BACKGROUNDS
+ */
+
+.bg-gradient-radial {
+  background: radial-gradient(ellipse at top, rgba(0, 150, 228, 0.08) 0%, transparent 50%);
+}
+
+.bg-gradient-page {
+  background:
+    radial-gradient(ellipse at top, rgba(0, 150, 228, 0.08) 0%, transparent 50%),
+    linear-gradient(180deg, var(--color-dark) 0%, var(--color-dark-lighter) 100%);
 }
 
 /**
@@ -112,16 +169,140 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 150, 228, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(0, 150, 228, 0.4);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes typing-bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+}
+
 .animate-fadeIn {
-  animation: fadeIn 0.6s ease-out forwards;
+  animation: fadeIn 0.4s ease-out forwards;
 }
 
 .animate-slideUp {
-  animation: slideUp 0.6s ease-out forwards;
+  animation: slideUp 0.5s ease-out forwards;
 }
 
 .animate-slideDown {
-  animation: slideDown 0.6s ease-out forwards;
+  animation: slideDown 0.5s ease-out forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(0, 150, 228, 0.1), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Typing indicator dots */
+.typing-dot {
+  animation: typing-bounce 1.4s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/**
+ * TRANSITIONS
+ */
+
+.transition-glow {
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 30px rgba(0, 150, 228, 0.25);
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+/**
+ * BUTTON STYLES
+ */
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 30px rgba(0, 150, 228, 0.4);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-light);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(0, 150, 228, 0.3);
+}
+
+/**
+ * LINK STYLES
+ */
+
+.link-underline {
+  position: relative;
+}
+
+.link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  transition: width 0.3s ease;
+}
+
+.link-underline:hover::after {
+  width: 100%;
 }
 
 /**
@@ -137,23 +318,45 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /**
- * SCROLLBAR STYLING (optional)
+ * SCROLLBAR STYLING
  */
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-light);
+  background: var(--color-dark);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-muted);
-  border-radius: 4px;
+  background: rgba(0, 150, 228, 0.3);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-dark);
+  background: rgba(0, 150, 228, 0.5);
+}
+
+/**
+ * SELECTION STYLING
+ */
+
+::selection {
+  background: rgba(0, 150, 228, 0.3);
+  color: var(--color-light);
+}
+
+/**
+ * PROSE OVERRIDES (for chat markdown)
+ */
+
+.prose-dark {
+  --tw-prose-body: var(--color-light);
+  --tw-prose-headings: var(--color-light);
+  --tw-prose-links: var(--color-secondary);
+  --tw-prose-bold: var(--color-light);
+  --tw-prose-code: var(--color-secondary);
+  --tw-prose-quotes: var(--color-muted);
 }

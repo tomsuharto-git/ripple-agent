@@ -16,38 +16,76 @@ export function NavBar() {
   return (
     <nav
       className={cn(
-        'top-0 left-0 right-0 z-50 backdrop-blur-sm border-b',
+        'top-0 left-0 right-0 z-50 glass-nav',
         features.stickyNav && 'fixed'
       )}
-      style={{
-        backgroundColor: 'rgba(var(--color-dark-rgb, 26, 23, 20), 0.95)',
-        borderColor: 'var(--color-muted)',
-      }}
     >
       <div className="px-6 md:px-8 py-4 flex items-center justify-between">
         {/* Home Link */}
         <Link
           href="/"
-          className="flex items-center gap-3 transition-opacity hover:opacity-80"
+          className="flex items-center gap-3 group transition-all"
           style={{ color: 'var(--color-light)' }}
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          {/* Animated logo icon */}
+          <div className="relative">
+            <div
+              className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              style={{
+                background: 'radial-gradient(circle, rgba(0, 150, 228, 0.3) 0%, transparent 70%)',
+                transform: 'scale(1.5)',
+              }}
             />
-          </svg>
-          <span style={{ fontFamily: 'var(--font-display)' }} className="text-lg">
+            <svg
+              className="w-6 h-6 relative z-10 transition-transform group-hover:scale-110"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
+            </svg>
+          </div>
+          <span
+            className="text-lg font-semibold gradient-text"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
             {project.name}
           </span>
         </Link>
 
-        {/* Menu Toggle */}
+        {/* Desktop Links */}
+        <div className="hidden md:flex items-center gap-1">
+          {enabledSections.slice(0, 4).map((section) => {
+            const isActive = pathname.startsWith(section.path);
+            return (
+              <Link
+                key={section.id}
+                href={section.path}
+                className={cn(
+                  'px-4 py-2 text-sm rounded-lg transition-all link-underline',
+                  isActive
+                    ? 'text-white bg-white/10'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                )}
+              >
+                <span className="mr-2" style={{ color: 'var(--color-primary)' }}>
+                  {section.icon}
+                </span>
+                {section.title}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Menu Toggle (Mobile) */}
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="p-2 transition-opacity hover:opacity-80"
+          className="md:hidden p-2 rounded-lg transition-all hover:bg-white/10"
           style={{ color: 'var(--color-light)' }}
           aria-label="Toggle menu"
         >
@@ -63,42 +101,41 @@ export function NavBar() {
         </button>
       </div>
 
-      {/* Dropdown Menu */}
-      {isMenuOpen && (
-        <div
-          className="absolute top-full left-0 right-0 border-b shadow-lg"
-          style={{
-            backgroundColor: 'var(--color-dark)',
-            borderColor: 'var(--color-muted)',
-          }}
-        >
-          <div className="max-w-4xl mx-auto md:grid md:grid-cols-2 lg:grid-cols-4">
-            {enabledSections.map((section) => {
-              const isActive = pathname.startsWith(section.path);
-              return (
-                <Link
-                  key={section.id}
-                  href={section.path}
-                  onClick={() => setIsMenuOpen(false)}
-                  className={cn(
-                    'block px-6 py-4 text-sm uppercase tracking-wider border-b md:border-b-0 md:border-r last:border-r-0 transition-colors',
-                    isActive && 'bg-white/10'
-                  )}
-                  style={{
-                    borderColor: 'rgba(var(--color-muted-rgb, 107, 107, 107), 0.3)',
-                    color: isActive ? 'var(--color-secondary)' : 'rgba(var(--color-light-rgb, 250, 247, 242), 0.7)',
-                  }}
-                >
-                  <span className="mr-3" style={{ color: 'var(--color-primary)' }}>
-                    {section.icon}
-                  </span>
-                  {section.title}
-                </Link>
-              );
-            })}
-          </div>
+      {/* Mobile Dropdown Menu */}
+      <div
+        className={cn(
+          'md:hidden overflow-hidden transition-all duration-300',
+          isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        )}
+      >
+        <div className="px-4 pb-4 space-y-1">
+          {enabledSections.map((section) => {
+            const isActive = pathname.startsWith(section.path);
+            return (
+              <Link
+                key={section.id}
+                href={section.path}
+                onClick={() => setIsMenuOpen(false)}
+                className={cn(
+                  'flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-all',
+                  isActive
+                    ? 'bg-white/10 text-white'
+                    : 'text-white/60 hover:bg-white/5 hover:text-white'
+                )}
+              >
+                <span style={{ color: 'var(--color-primary)' }}>{section.icon}</span>
+                <span>{section.title}</span>
+                {isActive && (
+                  <div
+                    className="ml-auto w-1.5 h-1.5 rounded-full"
+                    style={{ backgroundColor: 'var(--color-primary)' }}
+                  />
+                )}
+              </Link>
+            );
+          })}
         </div>
-      )}
+      </div>
     </nav>
   );
 }
