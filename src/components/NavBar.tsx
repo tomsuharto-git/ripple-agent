@@ -60,7 +60,7 @@ export function NavBar() {
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-1">
-          {enabledSections.slice(0, 4).map((section) => {
+          {enabledSections.slice(0, 6).map((section) => {
             const isActive = pathname.startsWith(section.path);
             return (
               <Link
