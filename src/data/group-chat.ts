@@ -62,7 +62,7 @@ export const personas: Persona[] = [
       'Believes in "589" price target',
       'Working class, practical mindset',
     ],
-    image: 'https://raw.githubusercontent.com/tomsuharto-git/irm-personas-api/main/personas/derek_kowalski.png',
+    image: '/personas/derek_kowalski.png',
     shortTitle: 'The OG',
     color: '#F59E0B', // Amber - matches his OG energy
   },
@@ -80,7 +80,7 @@ export const personas: Persona[] = [
       'Focused on fundamentals over hype',
       'Professional communication style',
     ],
-    image: 'https://raw.githubusercontent.com/tomsuharto-git/irm-personas-api/main/personas/marcus_reeves.png',
+    image: '/personas/marcus_reeves.png',
     shortTitle: 'Analyst',
     color: '#10B981', // Green - analytical/finance
   },
@@ -98,7 +98,7 @@ export const personas: Persona[] = [
       'Passionate about regulatory clarity',
       'Articulate and well-informed',
     ],
-    image: 'https://raw.githubusercontent.com/tomsuharto-git/irm-personas-api/main/personas/jasmine_okonkwo.png',
+    image: '/personas/jasmine_okonkwo.png',
     shortTitle: 'Legal',
     color: '#8B5CF6', // Purple - legal/organized
   },
