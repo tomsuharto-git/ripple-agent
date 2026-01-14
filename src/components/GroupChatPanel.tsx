@@ -613,7 +613,7 @@ export function GroupChatPanel({ initialPersonaId }: GroupChatPanelProps) {
 
       {/* Input Area */}
       <div className="border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-        <form onSubmit={handleSubmit} className="flex items-center gap-2 p-4">
+        <form onSubmit={handleSubmit} className="flex items-center gap-2 p-4 max-w-3xl mx-auto">
           <input
             ref={inputRef}
             type="text"
