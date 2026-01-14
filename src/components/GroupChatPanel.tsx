@@ -17,12 +17,9 @@ import { askGroup, askPersona, toAPIHistory } from '@/lib/focus-group-api';
  * GROUP CHAT PANEL
  *
  * Simulated focus group chat with XRP Army personas.
- * Features iMessage-style UI, typing indicators, and 1:1 mode.
- *
- * @mention support:
- * - @Derek or @Marcus or @Jasmine → only that person responds
- * - @Derek @Jasmine → only those two respond
- * - No @mention → AI decides who responds (2-4 people)
+ * Toggle personas on/off to control who responds.
+ * - All 3 selected: AI decides who responds (2-4 people)
+ * - 1-2 selected: Only those personas respond
  */
 
 // Persona color accent styles
@@ -32,50 +29,21 @@ const personaColors: Record<number, string> = {
   3: '#8B5CF6', // Jasmine - Purple
 };
 
-/**
- * Parse @mentions from input text.
- * Returns array of mentioned persona IDs and the cleaned question text.
- */
-function parseMentions(input: string): { mentionedIds: number[]; cleanedText: string } {
-  const mentionedIds: number[] = [];
-  let cleanedText = input;
-
-  // Check for each persona's first name (case-insensitive)
-  personas.forEach((persona) => {
-    const firstName = persona.name.split(' ')[0];
-    const mentionPattern = new RegExp(`@${firstName}\\b`, 'gi');
-
-    if (mentionPattern.test(input)) {
-      mentionedIds.push(persona.id);
-      // Remove the @mention from the text
-      cleanedText = cleanedText.replace(mentionPattern, '').trim();
-    }
-  });
-
-  // Clean up extra spaces
-  cleanedText = cleanedText.replace(/\s+/g, ' ').trim();
-
-  return { mentionedIds, cleanedText };
-}
-
 interface GroupChatPanelProps {
-  /** Start with a specific persona in 1:1 mode */
-  initialPersonaId?: number;
+  /** Start with specific personas selected */
+  initialPersonaIds?: number[];
 }
 
-export function GroupChatPanel({ initialPersonaId }: GroupChatPanelProps) {
+export function GroupChatPanel({ initialPersonaIds }: GroupChatPanelProps) {
   // Core state
   const [messages, setMessages] = useState<GroupMessage[]>([]);
   const [history, setHistory] = useState<APIMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Mode state
-  const [mode, setMode] = useState<'group' | 'individual'>(
-    initialPersonaId ? 'individual' : 'group'
-  );
-  const [selectedPersona, setSelectedPersona] = useState<Persona | null>(
-    initialPersonaId ? getPersonaById(initialPersonaId) || null : null
+  // Selection state - default all personas selected
+  const [selectedIds, setSelectedIds] = useState<number[]>(
+    initialPersonaIds || personas.map((p) => p.id)
   );
 
   // UI state
@@ -95,18 +63,17 @@ export function GroupChatPanel({ initialPersonaId }: GroupChatPanelProps) {
     scrollToBottom();
   }, [messages, typingPersonas, scrollToBottom]);
 
-  // Handle persona selection for 1:1 mode
-  const handlePersonaSelect = useCallback((persona: Persona) => {
-    setSelectedPersona(persona);
-    setMode('individual');
-    // Focus input after mode change
-    setTimeout(() => inputRef.current?.focus(), 100);
-  }, []);
-
-  // Return to group mode
-  const handleBackToGroup = useCallback(() => {
-    setSelectedPersona(null);
-    setMode('group');
+  // Toggle persona selection
+  const handlePersonaToggle = useCallback((personaId: number) => {
+    setSelectedIds((prev) => {
+      if (prev.includes(personaId)) {
+        // Don't allow deselecting if it's the last one
+        if (prev.length === 1) return prev;
+        return prev.filter((id) => id !== personaId);
+      } else {
+        return [...prev, personaId];
+      }
+    });
   }, []);
 
   // Staggered reveal of persona responses
@@ -161,15 +128,7 @@ export function GroupChatPanel({ initialPersonaId }: GroupChatPanelProps) {
       setInput('');
       setIsLoading(true);
 
-      // Parse @mentions from input (only in group mode)
-      const { mentionedIds, cleanedText } = mode === 'group'
-        ? parseMentions(userMessage)
-        : { mentionedIds: [], cleanedText: userMessage };
-
-      // Use cleaned text for API, but show original message to user
-      const questionForApi = cleanedText || userMessage;
-
-      // Add user message (show original with @mentions)
+      // Add user message
       setMessages((prev) => [
         ...prev,
         {
@@ -184,51 +143,46 @@ export function GroupChatPanel({ initialPersonaId }: GroupChatPanelProps) {
       const apiHistory = toAPIHistory(messages);
 
       try {
-        // Determine who should respond based on @mentions
-        if (mode === 'individual' && selectedPersona) {
-          // 1:1 mode - only selected persona responds
-          setTypingPersonas([selectedPersona.id]);
-          const response = await askPersona(selectedPersona.id, questionForApi, apiHistory);
-          setTypingPersonas([]);
-          await revealResponsesStaggered(response.responses, response.history);
-        } else if (mentionedIds.length === 1) {
-          // Single @mention - only that persona responds
-          setTypingPersonas(mentionedIds);
-          const response = await askPersona(mentionedIds[0], questionForApi, apiHistory);
-          setTypingPersonas([]);
-          await revealResponsesStaggered(response.responses, response.history);
-        } else if (mentionedIds.length > 1) {
-          // Multiple @mentions - each mentioned persona responds
-          setTypingPersonas(mentionedIds);
+        // Determine who should respond based on selection
+        const allSelected = selectedIds.length === personas.length;
 
-          // Collect all responses
-          const allResponses: Array<{ persona_id: number; persona_name: string; text: string }> = [];
-          let latestHistory = apiHistory;
-
-          for (const personaId of mentionedIds) {
-            const response = await askPersona(personaId, questionForApi, latestHistory);
-            allResponses.push(...response.responses);
-            latestHistory = response.history;
-          }
-
-          setTypingPersonas([]);
-          await revealResponsesStaggered(allResponses, latestHistory);
-        } else {
-          // No @mentions - let AI decide who responds (2-4 people)
-          // Show random 2-3 personas typing as placeholder
+        if (allSelected) {
+          // All personas selected - let AI decide who responds
           const randomPersonas = personas
             .sort(() => Math.random() - 0.5)
             .slice(0, Math.floor(Math.random() * 2) + 2)
             .map((p) => p.id);
           setTypingPersonas(randomPersonas);
 
-          const response = await askGroup(questionForApi, apiHistory);
+          const response = await askGroup(userMessage, apiHistory);
           setTypingPersonas([]);
           await revealResponsesStaggered(response.responses, response.history);
+        } else if (selectedIds.length === 1) {
+          // Single persona selected
+          setTypingPersonas(selectedIds);
+          const response = await askPersona(selectedIds[0], userMessage, apiHistory);
+          setTypingPersonas([]);
+          await revealResponsesStaggered(response.responses, response.history);
+        } else {
+          // Multiple (but not all) personas selected - each responds
+          setTypingPersonas(selectedIds);
+
+          const allResponses: Array<{ persona_id: number; persona_name: string; text: string }> = [];
+          let latestHistory = apiHistory;
+
+          for (const personaId of selectedIds) {
+            const response = await askPersona(personaId, userMessage, latestHistory);
+            allResponses.push(...response.responses);
+            latestHistory = response.history;
+          }
+
+          setTypingPersonas([]);
+          await revealResponsesStaggered(allResponses, latestHistory);
         }
       } catch (error) {
         console.error('Group chat error:', error);
         setTypingPersonas([]);
+        const fallbackPersona = getPersonaById(selectedIds[0]) || personas[0];
         setMessages((prev) => [
           ...prev,
           {
@@ -237,14 +191,14 @@ export function GroupChatPanel({ initialPersonaId }: GroupChatPanelProps) {
             content:
               "Sorry, I'm having trouble connecting right now. Please try again in a moment.",
             timestamp: new Date(),
-            persona: selectedPersona || personas[0],
+            persona: fallbackPersona,
           },
         ]);
       } finally {
         setIsLoading(false);
       }
     },
-    [isLoading, messages, mode, selectedPersona, revealResponsesStaggered]
+    [isLoading, messages, selectedIds, revealResponsesStaggered]
   );
 
   // Handle form submit
@@ -262,6 +216,28 @@ export function GroupChatPanel({ initialPersonaId }: GroupChatPanelProps) {
   // Determine if we show welcome state
   const showWelcome = messages.length === 0 && !isLoading;
 
+  // Get selected persona names for header
+  const getHeaderText = () => {
+    if (selectedIds.length === personas.length) {
+      return 'XRP Army Focus Group';
+    }
+    const names = selectedIds
+      .map((id) => getPersonaById(id)?.name.split(' ')[0])
+      .filter(Boolean);
+    return names.join(' & ');
+  };
+
+  const getSubheaderText = () => {
+    if (selectedIds.length === personas.length) {
+      return 'Click avatars to filter who responds';
+    }
+    if (selectedIds.length === 1) {
+      const persona = getPersonaById(selectedIds[0]);
+      return persona ? `${persona.shortTitle} • ${persona.occupation}` : '';
+    }
+    return `${selectedIds.length} of 3 selected`;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-page flex flex-col">
       {/* Header */}
@@ -270,63 +246,45 @@ export function GroupChatPanel({ initialPersonaId }: GroupChatPanelProps) {
         style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}
       >
         <div className="flex items-center gap-3">
-          {mode === 'individual' && (
-            <button
-              onClick={handleBackToGroup}
-              className="p-2 rounded-lg transition-all hover:bg-white/10"
-              style={{ color: 'var(--color-muted)' }}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-          )}
           <div>
             <h2
               className="text-lg font-semibold"
               style={{ fontFamily: 'var(--font-display)', color: 'var(--color-light)' }}
             >
-              {mode === 'individual' && selectedPersona
-                ? `Chatting with ${selectedPersona.name}`
-                : 'XRP Army Focus Group'}
+              {getHeaderText()}
             </h2>
             <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
-              {mode === 'individual' && selectedPersona
-                ? `${selectedPersona.shortTitle} • ${selectedPersona.occupation}`
-                : 'Three passionate community members'}
+              {getSubheaderText()}
             </p>
           </div>
         </div>
-        {mode === 'group' && (
-          <div className="text-xs px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', color: 'var(--color-muted)' }}>
-            Group Mode
-          </div>
-        )}
+        <div
+          className="text-xs px-3 py-1 rounded-full"
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', color: 'var(--color-muted)' }}
+        >
+          {selectedIds.length === personas.length ? 'All' : selectedIds.length} active
+        </div>
       </div>
 
-      {/* Persona Bar */}
+      {/* Persona Bar - Toggle Selection */}
       <div
         className="flex justify-center gap-6 py-4 border-b"
         style={{ borderColor: 'rgba(255, 255, 255, 0.05)' }}
       >
         {personas.map((persona) => {
-          const isSelected = selectedPersona?.id === persona.id;
+          const isSelected = selectedIds.includes(persona.id);
           const color = personaColors[persona.id];
           const isTyping = typingPersonas.includes(persona.id);
 
           return (
             <button
               key={persona.id}
-              onClick={() => handlePersonaSelect(persona)}
+              onClick={() => handlePersonaToggle(persona.id)}
               className={`flex flex-col items-center gap-2 group transition-all duration-200 ${
-                isSelected ? 'scale-105' : 'hover:scale-105'
+                isSelected ? 'scale-105' : 'opacity-40 hover:opacity-70'
               }`}
               disabled={isLoading}
+              title={isSelected ? 'Click to remove from conversation' : 'Click to add to conversation'}
             >
               <div className="relative">
                 <div
@@ -334,8 +292,9 @@ export function GroupChatPanel({ initialPersonaId }: GroupChatPanelProps) {
                     isTyping ? 'animate-pulse-glow' : ''
                   }`}
                   style={{
-                    border: isSelected ? `3px solid ${color}` : '3px solid transparent',
+                    border: isSelected ? `3px solid ${color}` : '3px solid rgba(255,255,255,0.2)',
                     boxShadow: isSelected ? `0 0 20px ${color}40` : 'none',
+                    filter: isSelected ? 'none' : 'grayscale(50%)',
                   }}
                 >
                   <Image
@@ -346,19 +305,19 @@ export function GroupChatPanel({ initialPersonaId }: GroupChatPanelProps) {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                {/* Online indicator */}
+                {/* Status indicator - green if selected, gray if not */}
                 <div
-                  className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2"
+                  className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 transition-all"
                   style={{
-                    backgroundColor: color,
+                    backgroundColor: isSelected ? color : 'rgba(255,255,255,0.3)',
                     borderColor: 'var(--color-dark)',
                   }}
                 />
               </div>
               <div className="text-center">
                 <p
-                  className="text-xs font-medium"
-                  style={{ color: isSelected ? color : 'var(--color-light)' }}
+                  className="text-xs font-medium transition-colors"
+                  style={{ color: isSelected ? color : 'var(--color-muted)' }}
                 >
                   {persona.name.split(' ')[0]}
                 </p>
@@ -409,7 +368,7 @@ export function GroupChatPanel({ initialPersonaId }: GroupChatPanelProps) {
                   Three passionate community members are here to share their perspectives.
                 </p>
                 <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
-                  Ask a question or click a persona to chat 1:1
+                  Click avatars above to choose who responds
                 </p>
               </div>
 
@@ -481,9 +440,10 @@ export function GroupChatPanel({ initialPersonaId }: GroupChatPanelProps) {
                 {/* Persona Avatar */}
                 {!isUser && persona && (
                   <button
-                    onClick={() => handlePersonaSelect(persona)}
+                    onClick={() => handlePersonaToggle(persona.id)}
                     className="flex-shrink-0 transition-transform hover:scale-110"
                     disabled={isLoading}
+                    title={selectedIds.includes(persona.id) ? 'Click to remove' : 'Click to add'}
                   >
                     <div
                       className="w-10 h-10 rounded-full overflow-hidden"
@@ -622,9 +582,11 @@ export function GroupChatPanel({ initialPersonaId }: GroupChatPanelProps) {
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             placeholder={
-              mode === 'individual' && selectedPersona
-                ? `Ask ${selectedPersona.name.split(' ')[0]} something...`
-                : 'Ask the group... (use @Derek @Marcus @Jasmine to target)'
+              selectedIds.length === personas.length
+                ? 'Ask the group...'
+                : selectedIds.length === 1
+                ? `Ask ${getPersonaById(selectedIds[0])?.name.split(' ')[0]}...`
+                : `Ask ${selectedIds.map((id) => getPersonaById(id)?.name.split(' ')[0]).join(' & ')}...`
             }
             className={`flex-1 px-5 py-3 rounded-full bg-transparent text-sm transition-all duration-300 ${
               isFocused ? 'glow-focus' : ''

@@ -66,7 +66,7 @@ export const allSections: Section[] = [
     subtitle: 'The Voices',
     description: 'Meet three members of the XRP Army in a simulated focus group conversation.',
     path: '/group-chat',
-    icon: '💬',
+    icon: '⬢',
     color: 'secondary',
     order: 5,
   },
