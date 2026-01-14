@@ -61,6 +61,16 @@ export const allSections: Section[] = [
     order: 4,
   },
   {
+    id: 'groupChat',
+    title: 'Group Chat',
+    subtitle: 'The Voices',
+    description: 'Meet three members of the XRP Army in a simulated focus group conversation.',
+    path: '/group-chat',
+    icon: '💬',
+    color: 'secondary',
+    order: 5,
+  },
+  {
     id: 'brief',
     title: 'RFP',
     subtitle: 'The Direction',
@@ -68,7 +78,7 @@ export const allSections: Section[] = [
     path: '/brief',
     icon: '◎',
     color: 'primary',
-    order: 5,
+    order: 6,
   },
   {
     id: 'roast',
@@ -78,7 +88,7 @@ export const allSections: Section[] = [
     path: '/roast',
     icon: '🔥',
     color: 'dark',
-    order: 6,
+    order: 7,
   },
   {
     id: 'analysis',
@@ -88,7 +98,7 @@ export const allSections: Section[] = [
     path: '/analysis',
     icon: '◆',
     color: 'dark',
-    order: 7,
+    order: 8,
   },
   {
     id: 'audience',
@@ -98,7 +108,7 @@ export const allSections: Section[] = [
     path: '/audience',
     icon: '●',
     color: 'primary',
-    order: 8,
+    order: 9,
   },
   {
     id: 'inspiration',
@@ -108,7 +118,7 @@ export const allSections: Section[] = [
     path: '/inspiration',
     icon: '✦',
     color: 'dark',
-    order: 9,
+    order: 10,
   },
   {
     id: 'timeline',
@@ -118,7 +128,7 @@ export const allSections: Section[] = [
     path: '/timeline',
     icon: '═',
     color: 'primary',
-    order: 10,
+    order: 11,
   },
   {
     id: 'settings',
@@ -128,7 +138,7 @@ export const allSections: Section[] = [
     path: '/settings',
     icon: '⚙',
     color: 'dark',
-    order: 11,
+    order: 12,
   },
 ];
 

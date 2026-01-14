@@ -19,6 +19,7 @@ export const features = {
     research: true,             // Get Smart / 6Cs research
     deepdive: true,             // Deep Dive research library
     insights: true,             // Creative Insights (10 provocations)
+    groupChat: true,            // XRP Army Focus Group Chat
     analysis: false,            // RFP/Brief analysis
     diagnosis: true,            // Growth Diagnosis
     audience: false,            // Growth Audience / Target profiles
