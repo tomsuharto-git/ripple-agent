@@ -31,6 +31,16 @@ export const allSections: Section[] = [
     order: 1,
   },
   {
+    id: 'diagnosis',
+    title: 'Growth Diagnosis',
+    subtitle: 'The Strategy',
+    description: 'Comprehensive 9-component analysis of Ripple\'s brand health and growth barriers.',
+    path: '/diagnosis',
+    icon: '▲',
+    color: 'dark',
+    order: 2,
+  },
+  {
     id: 'deepdive',
     title: 'Deep Dive',
     subtitle: 'The Research',
@@ -38,7 +48,7 @@ export const allSections: Section[] = [
     path: '/deep-dive',
     icon: '⬡',
     color: 'secondary',
-    order: 2,
+    order: 3,
   },
   {
     id: 'insights',
@@ -48,16 +58,6 @@ export const allSections: Section[] = [
     path: '/insights',
     icon: '★',
     color: 'primary',
-    order: 3,
-  },
-  {
-    id: 'diagnosis',
-    title: 'Growth Diagnosis',
-    subtitle: 'The Strategy',
-    description: 'Comprehensive 9-component analysis of Ripple\'s brand health and growth barriers.',
-    path: '/diagnosis',
-    icon: '▲',
-    color: 'dark',
     order: 4,
   },
   {
