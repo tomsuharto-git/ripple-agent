@@ -39,6 +39,8 @@ export async function askGroup(
 
 /**
  * Ask a question to a specific persona (1:1 mode).
+ * Note: Individual endpoint returns { response: {...} } not { responses: [...] }
+ * so we normalize it to match the group response format.
  */
 export async function askPersona(
   personaId: number,
@@ -64,7 +66,14 @@ export async function askPersona(
     throw new Error(`API error: ${response.status} - ${errorText}`);
   }
 
-  return response.json();
+  const data = await response.json();
+
+  // Normalize: individual endpoint returns { response: {...} }
+  // but we need { responses: [...] } to match group format
+  return {
+    responses: [data.response],
+    history: data.history,
+  };
 }
 
 /**
