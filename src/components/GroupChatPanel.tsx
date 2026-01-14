@@ -18,6 +18,11 @@ import { askGroup, askPersona, toAPIHistory } from '@/lib/focus-group-api';
  *
  * Simulated focus group chat with XRP Army personas.
  * Features iMessage-style UI, typing indicators, and 1:1 mode.
+ *
+ * @mention support:
+ * - @Derek or @Marcus or @Jasmine → only that person responds
+ * - @Derek @Jasmine → only those two respond
+ * - No @mention → AI decides who responds (2-4 people)
  */
 
 // Persona color accent styles
@@ -26,6 +31,32 @@ const personaColors: Record<number, string> = {
   2: '#10B981', // Marcus - Green
   3: '#8B5CF6', // Jasmine - Purple
 };
+
+/**
+ * Parse @mentions from input text.
+ * Returns array of mentioned persona IDs and the cleaned question text.
+ */
+function parseMentions(input: string): { mentionedIds: number[]; cleanedText: string } {
+  const mentionedIds: number[] = [];
+  let cleanedText = input;
+
+  // Check for each persona's first name (case-insensitive)
+  personas.forEach((persona) => {
+    const firstName = persona.name.split(' ')[0];
+    const mentionPattern = new RegExp(`@${firstName}\\b`, 'gi');
+
+    if (mentionPattern.test(input)) {
+      mentionedIds.push(persona.id);
+      // Remove the @mention from the text
+      cleanedText = cleanedText.replace(mentionPattern, '').trim();
+    }
+  });
+
+  // Clean up extra spaces
+  cleanedText = cleanedText.replace(/\s+/g, ' ').trim();
+
+  return { mentionedIds, cleanedText };
+}
 
 interface GroupChatPanelProps {
   /** Start with a specific persona in 1:1 mode */
@@ -130,7 +161,15 @@ export function GroupChatPanel({ initialPersonaId }: GroupChatPanelProps) {
       setInput('');
       setIsLoading(true);
 
-      // Add user message
+      // Parse @mentions from input (only in group mode)
+      const { mentionedIds, cleanedText } = mode === 'group'
+        ? parseMentions(userMessage)
+        : { mentionedIds: [], cleanedText: userMessage };
+
+      // Use cleaned text for API, but show original message to user
+      const questionForApi = cleanedText || userMessage;
+
+      // Add user message (show original with @mentions)
       setMessages((prev) => [
         ...prev,
         {
@@ -145,29 +184,48 @@ export function GroupChatPanel({ initialPersonaId }: GroupChatPanelProps) {
       const apiHistory = toAPIHistory(messages);
 
       try {
-        // Show generic typing indicator while waiting for API
-        if (mode === 'group') {
-          // Show random 2-3 personas typing
+        // Determine who should respond based on @mentions
+        if (mode === 'individual' && selectedPersona) {
+          // 1:1 mode - only selected persona responds
+          setTypingPersonas([selectedPersona.id]);
+          const response = await askPersona(selectedPersona.id, questionForApi, apiHistory);
+          setTypingPersonas([]);
+          await revealResponsesStaggered(response.responses, response.history);
+        } else if (mentionedIds.length === 1) {
+          // Single @mention - only that persona responds
+          setTypingPersonas(mentionedIds);
+          const response = await askPersona(mentionedIds[0], questionForApi, apiHistory);
+          setTypingPersonas([]);
+          await revealResponsesStaggered(response.responses, response.history);
+        } else if (mentionedIds.length > 1) {
+          // Multiple @mentions - each mentioned persona responds
+          setTypingPersonas(mentionedIds);
+
+          // Collect all responses
+          const allResponses: Array<{ persona_id: number; persona_name: string; text: string }> = [];
+          let latestHistory = apiHistory;
+
+          for (const personaId of mentionedIds) {
+            const response = await askPersona(personaId, questionForApi, latestHistory);
+            allResponses.push(...response.responses);
+            latestHistory = response.history;
+          }
+
+          setTypingPersonas([]);
+          await revealResponsesStaggered(allResponses, latestHistory);
+        } else {
+          // No @mentions - let AI decide who responds (2-4 people)
+          // Show random 2-3 personas typing as placeholder
           const randomPersonas = personas
             .sort(() => Math.random() - 0.5)
             .slice(0, Math.floor(Math.random() * 2) + 2)
             .map((p) => p.id);
           setTypingPersonas(randomPersonas);
-        } else if (selectedPersona) {
-          setTypingPersonas([selectedPersona.id]);
+
+          const response = await askGroup(questionForApi, apiHistory);
+          setTypingPersonas([]);
+          await revealResponsesStaggered(response.responses, response.history);
         }
-
-        // Call appropriate API
-        const response =
-          mode === 'group'
-            ? await askGroup(userMessage, apiHistory)
-            : await askPersona(selectedPersona!.id, userMessage, apiHistory);
-
-        // Clear initial typing indicators
-        setTypingPersonas([]);
-
-        // Reveal responses with stagger effect
-        await revealResponsesStaggered(response.responses, response.history);
       } catch (error) {
         console.error('Group chat error:', error);
         setTypingPersonas([]);
@@ -566,7 +624,7 @@ export function GroupChatPanel({ initialPersonaId }: GroupChatPanelProps) {
             placeholder={
               mode === 'individual' && selectedPersona
                 ? `Ask ${selectedPersona.name.split(' ')[0]} something...`
-                : 'Ask the group anything about XRP...'
+                : 'Ask the group... (use @Derek @Marcus @Jasmine to target)'
             }
             className={`flex-1 px-5 py-3 rounded-full bg-transparent text-sm transition-all duration-300 ${
               isFocused ? 'glow-focus' : ''
